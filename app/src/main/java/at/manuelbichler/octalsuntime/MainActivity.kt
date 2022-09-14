@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity() {
             if( location != null ) {
                 locationFound = true
                 updateLocation(location.latitude, location.longitude)
-                break;
+                break
             }
         } while (providers.isNotEmpty())
 
@@ -175,7 +175,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * uses the stored latitude and longitude to update the clock. Also updates the UI.
      */
-    fun updateClock() {
+    private fun updateClock() {
         val digitalClock = findViewById<TextView>(R.id.digital_clock)
         val clockFingers = findViewById<ClockFingersView>(R.id.clock_fingers)
         // get sun location
@@ -192,8 +192,6 @@ class MainActivity : AppCompatActivity() {
         updateTimes(now.time, sunrise, sunset, solarnoon)
 
         val ocataltimeMinutes = currentTime*OCTAL_MINUTES_PER_SOLAR_DAY
-        val sunriseOctaltimeMinute = sunriseTime* OCTAL_MINUTES_PER_SOLAR_DAY
-        val sunsetOctaltimeMinute = sunsetTime* OCTAL_MINUTES_PER_SOLAR_DAY
 
         // update UI:
         runOnUiThread {
@@ -223,8 +221,6 @@ class MainActivity : AppCompatActivity() {
         override fun onDraw(canvas: Canvas) {
             val diameter = 0.98*min(canvas.width, canvas.height)
             val radius = (diameter / 2.0).toFloat()
-            val startx = ( canvas.width - diameter ) / 2.0f
-            val starty = ( canvas.height - diameter ) / 2.0f
             val centerX = canvas.width / 2.0f
             val centerY = canvas.height / 2.0f
             // white background circle:
@@ -236,7 +232,6 @@ class MainActivity : AppCompatActivity() {
             val lengthOuterMinuteTick = 0.1f * radius // % of radius for the outer minute tick length
             val lengthOuterMinute4Tick = 0.15f * radius // % of radius for the middle outer minute tick length (outer minute 4)
             val textSizeHour = 0.1f * radius
-            val textSizeOuterMinute = 0.06f * radius
             for( i in 0..7) { // hour ticks. i represents the angle.
                 val tickRelX = -sin(2*PI*i/8.0)
                 val tickRelY = cos(2*PI*i/8.0)

@@ -1,6 +1,8 @@
 # octalsuntime
 A solar clock in the octal number system
 
+![Screenshot](https://user-images.githubusercontent.com/5845239/190221775-4f55d8a8-b760-4ba6-897b-f798fadcb627.png)
+
 This is an Android application that implements the octal solar time.
 
 Octal solar time is a location-specific time system that defines a day as the time between two consecutive solar midnights.

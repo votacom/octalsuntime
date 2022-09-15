@@ -146,7 +146,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * given a day's solar noon Date and a pint in time in the same day, returns the relative sun time of that point in time (between 0 and 1).
+     * given a day's solar noon Date and a point in time, returns the relative sun time of that point in time (in range [0,1[) if it were on the same day.
      * 0 means solar midnight, 0.5 means solar noon.
      */
     fun getRelativeTime(datetime : Date, solarnoon : Date) : Double {
@@ -156,7 +156,7 @@ class MainActivity : AppCompatActivity() {
         ) // positive if now is after noon, negative if now is before noon
         val relativeDifferenceToSolarNoon =
             differenceToSolarNoon.toMillis().toDouble() / Duration.ofDays(1).toMillis()
-        return relativeDifferenceToSolarNoon + 0.5
+        return (relativeDifferenceToSolarNoon + 0.5).rem(1)
     }
 
     /**

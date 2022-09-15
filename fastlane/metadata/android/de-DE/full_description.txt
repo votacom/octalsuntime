@@ -1,0 +1,5 @@
+Eine Uhr, die die oktale Sonnenzeit deines Standorts anzeigt.
+
+Oktale Sonnenzeit ist ein standortabhängiges Zeitsystem, das einen Tag als die Zeit zwischen zwei aufeinanderfolgenden Sonnentiefstständen (solare Mitternächte) definiert. Ein im herkömmlichen Zeitsystem in 24 Stunden aufgeteilter Tag besteht aus 8 gleich langen oktalen Stunden. Jede oktale Stunde besteht aus 64 gleich langen oktalen Minuten. Jede oktale Minute besteht aus 64 gleich langen oktalen Sekunden.
+
+Die Uhrzeit wir von einem Zeiger angezeigt, der eine Umdrehung pro Tag macht. Am Ziffernblatt befindet sich Stunde 0 (solare Mitternacht) unten und Stunde 4 (Sonnenhöchststand) oben. Zudem wird die Uhrzeit (Stunde und Minute) digital in der Mitte als dreistellige Oktalzahl angezeigt. Ein goldener Bogen zeigt die Zeit zwischen Sonnenauf- und -untergang.

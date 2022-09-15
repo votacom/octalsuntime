@@ -1,0 +1,2 @@
+* add launcher icon
+* fix 4-digit bug

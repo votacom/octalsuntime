@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             }
             val bestProvider = locationManager.getBestProvider(criteria, true )
             var locationUpdatePosted = false
-            do {
+            while (remainingProviders.isNotEmpty() && !locationUpdatePosted) {
                 val tryProvider : String
                 if(remainingProviders.size > 1 && bestProvider != null && remainingProviders.contains(bestProvider)) {
                     tryProvider = bestProvider
@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
                 if(remainingProviders.isEmpty()) {
                     Log.w("location", "location providers exhausted. No location provider could provide a location. Not updating the app's location.")
                 }
-            } while (remainingProviders.isNotEmpty() && !locationUpdatePosted)
+            }
         }
 
         // start with last known location:
@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         val providers = locationManager.getProviders(criteria, true)
         val bestProvider = locationManager.getBestProvider(criteria, true )
         var locationFound = false
-        do {
+        while (providers.isNotEmpty()) {
             val tryProvider : String
             if( bestProvider != null && providers.contains(bestProvider) ) {
                 tryProvider = bestProvider
@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity() {
                 updateLocation(location.latitude, location.longitude)
                 break
             }
-        } while (providers.isNotEmpty())
+        }
 
         if(!locationFound) {
             // start with 0/0 location, until updated (todo use last known location instead):

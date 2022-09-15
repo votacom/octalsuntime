@@ -1,0 +1,1 @@
+* fix NoSuchElementException on startup and when reloading location in case no location providers are present

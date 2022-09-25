@@ -1,10 +1,10 @@
-package at.manuelbichler.octalsuntime.data.access
+package at.manuelbichler.octalsuntime.data
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import at.manuelbichler.octalsuntime.data.Location
+import at.manuelbichler.octalsuntime.model.Location
 
 @Dao
 interface LocationDao {
@@ -19,6 +19,9 @@ interface LocationDao {
 
     @Insert
     fun insertAll(vararg locations: Location)
+
+    @Insert
+    fun insert(location: Location)
 
     @Delete
     fun delete(location: Location)

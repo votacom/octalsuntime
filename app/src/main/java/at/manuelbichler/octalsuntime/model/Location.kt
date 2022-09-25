@@ -1,6 +1,5 @@
-package at.manuelbichler.octalsuntime.data
+package at.manuelbichler.octalsuntime.model
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey

@@ -222,7 +222,7 @@ class ClockActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.locations -> {
+            R.id.add_location -> {
                 startActivity(Intent(this, LocationsActivity::class.java))
                 true
             }

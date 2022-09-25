@@ -5,14 +5,20 @@
       <map>
         <entry key="../../../../layout/custom_preview.xml" value="0.12859712230215828" />
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.2" />
+        <entry key="app/src/main/res/drawable/ic_baseline_add_location_alt_48.xml" value="0.1715" />
+        <entry key="app/src/main/res/drawable/ic_baseline_delete_48.xml" value="0.1715" />
         <entry key="app/src/main/res/drawable/ic_baseline_location_on_48.xml" value="0.1715" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_clock.xml" value="0.2" />
-        <entry key="app/src/main/res/layout/activity_locations.xml" value="0.11684782608695653" />
+        <entry key="app/src/main/res/layout/activity_locations.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/fragment_location.xml" value="0.15217391304347827" />
+        <entry key="app/src/main/res/layout/fragment_location_list.xml" value="0.15217391304347827" />
         <entry key="app/src/main/res/layout/fragment_locations.xml" value="0.15217391304347827" />
         <entry key="app/src/main/res/layout/fragment_locations_list.xml" value="0.11684782608695653" />
+        <entry key="app/src/main/res/layout/list_location.xml" value="0.17097264437689969" />
         <entry key="app/src/main/res/layout/toolbar.xml" value="0.11684782608695653" />
+        <entry key="app/src/main/res/menu/menu_locations.xml" value="0.3111111111111111" />
         <entry key="app/src/main/res/menu/menu_main.xml" value="0.178125" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1895" />

@@ -1,11 +1,11 @@
 package at.manuelbichler.octalsuntime
 
 import android.app.Application
-import androidx.lifecycle.viewModelScope
 import at.manuelbichler.octalsuntime.data.AppDatabase
-import at.manuelbichler.octalsuntime.model.Location
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 
 class OctalSuntimeApplication : Application() {
-    val database: AppDatabase by lazy { AppDatabase.getDatabase(this) }
+    private val appScope = CoroutineScope(SupervisorJob())
+    val database: AppDatabase by lazy { AppDatabase.getDatabase(this, appScope) }
 }

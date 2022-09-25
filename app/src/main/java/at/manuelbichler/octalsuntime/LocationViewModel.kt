@@ -1,36 +1,30 @@
 package at.manuelbichler.octalsuntime
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import at.manuelbichler.octalsuntime.model.Location
 import at.manuelbichler.octalsuntime.data.LocationDao
 import kotlinx.coroutines.launch
 
-class LocationViewModel(private val locationDao : LocationDao) : ViewModel() {
-    private fun insertLocation(location : Location) { // suspend function
+class LocationViewModel(private val dao : LocationDao) : ViewModel() {
+
+    val locations: LiveData<List<Location>> = dao.getAll().asLiveData()
+
+    private fun insert(location : Location) { // suspend function
         viewModelScope.launch {
-            locationDao.insert(location)
+            dao.insert(location)
         }
     }
 
-    private fun getNewLocationEntry(name: String, latitude: Float, longitude: Float): Location {
-        return Location(
-            name, latitude, longitude
-        )
-    }
-
     fun addNewLocation(name: String, latitude: Float, longitude: Float) {
-        val newLocation = getNewLocationEntry(name, latitude, longitude)
-        insertLocation(newLocation)
+        insert( Location( name, latitude, longitude ) )
     }
 }
 
-class LocationsViewModelFactory(private val locationDao : LocationDao) : ViewModelProvider.Factory {
+class LocationsViewModelFactory(private val dao : LocationDao) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(LocationViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return LocationViewModel(locationDao) as T
+            return LocationViewModel(dao) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

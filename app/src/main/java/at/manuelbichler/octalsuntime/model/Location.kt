@@ -10,4 +10,5 @@ data class Location(
     val latitude: Float,
     val longitude: Float
     // lat and lon: on Earth, in degrees.
+
 )

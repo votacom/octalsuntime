@@ -15,8 +15,18 @@ class LocationViewModel(private val dao : LocationDao) : ViewModel() {
         }
     }
 
+    private fun deleteAll() { // suspend function
+        viewModelScope.launch {
+            dao.deleteAll()
+        }
+    }
+
     fun addNewLocation(name: String, latitude: Float, longitude: Float) {
         insert( Location( name, latitude, longitude ) )
+    }
+
+    fun clear() {
+        deleteAll()
     }
 }
 

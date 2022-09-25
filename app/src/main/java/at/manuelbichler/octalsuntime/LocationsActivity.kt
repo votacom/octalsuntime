@@ -1,12 +1,14 @@
 package at.manuelbichler.octalsuntime
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.activity.viewModels
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.RecyclerView
 import at.manuelbichler.octalsuntime.adapter.LocationAdapter
-import at.manuelbichler.octalsuntime.data.AppDatabase
-import at.manuelbichler.octalsuntime.model.Location
 
 class LocationsActivity : AppCompatActivity() {
 
@@ -18,6 +20,7 @@ class LocationsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_locations)
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // allow navigating back
+        setSupportActionBar(findViewById<Toolbar>(R.id.locations_toolbar))
 
         val recyclerView = findViewById<RecyclerView>(R.id.locations_recycler_view)
         val adapter = LocationAdapter()
@@ -33,4 +36,28 @@ class LocationsActivity : AppCompatActivity() {
         }
 
     }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_locations, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+/*            R.id.add_location -> {
+                startActivity(Intent(this, AddLocationActivity::class.java))
+                true
+            }*/
+            R.id.clear_locations -> {
+                viewModel.clear() // TODO errors: java.lang.IllegalStateException: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
 }

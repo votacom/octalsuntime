@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">octalsuntime</string>
     <string name="update_location">Update Location</string>
-    <string name="action_locations">Manage locations</string>
+    <string name="manage_locations">Manage locations</string>
     <string name="locations">Locations</string>
     <string name="add_location">Add location</string>
     <string name="search_locations">Search locations</string>

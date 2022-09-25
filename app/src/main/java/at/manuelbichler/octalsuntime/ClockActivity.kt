@@ -2,6 +2,7 @@ package at.manuelbichler.octalsuntime
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -13,11 +14,14 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import ca.rmen.sunrisesunset.SunriseSunset
 import java.lang.Exception
@@ -26,7 +30,7 @@ import java.util.*
 import kotlin.collections.HashSet
 import kotlin.math.*
 
-class MainActivity : AppCompatActivity() {
+class ClockActivity : AppCompatActivity() {
 
     var currentTime : Double = 0.0 // between 0 and 1
     var sunriseTime : Double = 0.0 // between 0 and 1
@@ -41,7 +45,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_clock)
+        setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
+
         val updateLocationButton = findViewById<Button>(R.id.location_button)
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -204,6 +210,26 @@ class MainActivity : AppCompatActivity() {
         val millisecondsUntilNextOctalSecond = octalsecondsUntilNextOctalSecond * MILLISECONDS_PER_OCTAL_SECOND
         updateHandler.postDelayed({this.updateClock()}, millisecondsUntilNextOctalSecond.roundToLong() + 1)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.locations -> {
+                startActivity(Intent(this, LocationsActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
 
     companion object {
         private const val OCTAL_HOURS_PER_SOLAR_DAY = 8

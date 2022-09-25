@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="at.manuelbichler.octalsuntime">
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -14,16 +16,17 @@
         android:theme="@style/Theme.Octalsuntime"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".ClockActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".LocationsActivity"
+            android:exported="false"
+            android:parentActivityName=".ClockActivity"/>
     </application>
-
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
 </manifest>

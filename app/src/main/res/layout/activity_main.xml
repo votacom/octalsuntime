@@ -37,8 +37,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textColor="@color/black"
             android:textStyle="bold"
-            android:visibility="visible"
-            app:textAllCaps="false" />
+            android:visibility="visible" />
     </FrameLayout>
 
     <TextView

@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "at.manuelbichler.octalsuntime"
-        minSdk 31
+        minSdk 23
         targetSdk 33
         versionCode 3
         versionName "0.1.2"

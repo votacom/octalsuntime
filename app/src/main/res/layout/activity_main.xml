@@ -6,42 +6,39 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/digital_clock"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:elevation="3pt"
-        android:textAlignment="center"
-        android:textAllCaps="false"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textColor="@color/black"
-        android:textStyle="bold"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="@+id/clock_face"
-        app:layout_constraintEnd_toEndOf="@+id/clock_face"
-        app:layout_constraintStart_toStartOf="@+id/clock_face"
-        app:layout_constraintTop_toTopOf="@+id/clock_face" />
-
-    <view
-        android:id="@+id/clock_face"
-        class="at.manuelbichler.octalsuntime.MainActivity$ClockFaceView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:elevation="1pt"
-        app:layout_constraintBottom_toBottomOf="@+id/clock_fingers"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <view
-        android:id="@+id/clock_fingers"
-        class="at.manuelbichler.octalsuntime.MainActivity$ClockFingersView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:elevation="2pt"
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/location_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <view
+            android:id="@+id/clock_face"
+            class="at.manuelbichler.octalsuntime.MainActivity$ClockFaceView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="1pt" />
+
+        <view
+            android:id="@+id/clock_fingers"
+            class="at.manuelbichler.octalsuntime.MainActivity$ClockFingersView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="2pt" />
+
+        <TextView
+            android:id="@+id/digital_clock"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:elevation="3pt"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:visibility="visible" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/location_view"
@@ -49,7 +46,6 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@+id/location_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button

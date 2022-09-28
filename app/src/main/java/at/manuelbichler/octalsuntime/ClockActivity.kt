@@ -9,17 +9,16 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import at.manuelbichler.octalsuntime.model.Location
 import ca.rmen.sunrisesunset.SunriseSunset
 import java.time.Duration
 import java.util.*
-import kotlin.collections.HashSet
 import kotlin.math.*
 
 class ClockActivity : AppCompatActivity() {
@@ -31,11 +30,11 @@ class ClockActivity : AppCompatActivity() {
     var longitude : Float = 0.0f // in degrees
     var locationName : String = ""
 
-    lateinit var preferences : SharedPreferences
+    private lateinit var preferences : SharedPreferences
 
-    val updateHandler = Handler(Looper.getMainLooper())
+    private val updateHandler = Handler(Looper.getMainLooper())
 
-    val locationProviderBlocklist : MutableSet<String> = HashSet() // list of already-tried but failed location providers
+    private val locationSelectionContract = registerForActivityResult(LocationsActivity.SelectLocationContract()) {it?.let { updateLocation(it) } }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +72,7 @@ class ClockActivity : AppCompatActivity() {
     /**
      * calculates and sets this instance's current, sunrise, and sunset relative times, given these three points in time in regular timestamps, plus a reference timestamp for solar noon.
      */
-    fun updateTimes(now : Date, sunrise : Date, sunset : Date, solarnoon : Date) {
+    private fun updateTimes(now : Date, sunrise : Date, sunset : Date, solarnoon : Date) {
         currentTime = getRelativeTime(now, solarnoon)
         sunriseTime = getRelativeTime(sunrise, solarnoon)
         sunsetTime = getRelativeTime(sunset, solarnoon)
@@ -83,9 +82,9 @@ class ClockActivity : AppCompatActivity() {
      * given a day's solar noon Date and a point in time, returns the relative sun time of that point in time (in range [0,1[) if it were on the same day.
      * 0 means solar midnight, 0.5 means solar noon.
      */
-    fun getRelativeTime(datetime : Date, solarnoon : Date) : Double {
+    private fun getRelativeTime(datetime : Date, solarNoon : Date) : Double {
         val differenceToSolarNoon = Duration.between(
-            solarnoon.toInstant(),
+            solarNoon.toInstant(),
             datetime.toInstant()
         ) // positive if now is after noon, negative if now is before noon
         val relativeDifferenceToSolarNoon =
@@ -96,7 +95,7 @@ class ClockActivity : AppCompatActivity() {
     /**
      * updates the clock according to lat and lon members and the location label.
      */
-    fun updateUiLocation() {
+    private fun updateUiLocation() {
         val locationNameTextview = findViewById<TextView>(R.id.clock_location_name)
         runOnUiThread{
             locationNameTextview.text = locationName
@@ -158,38 +157,17 @@ class ClockActivity : AppCompatActivity() {
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.manage_locations -> {
-                startActivityForResult(Intent(this, LocationsActivity::class.java),
-                    Companion.LOCATION_REQUEST_CODE
-                )
+                locationSelectionContract.launch(null)
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        Log.d("clockActivity onActivityResult", "requestCode=$requestCode, resultCode=$resultCode, data=$data")
-        when(requestCode) {
-            LOCATION_REQUEST_CODE -> {
-                if(resultCode==RESULT_OK && data?.data?.scheme == "geo" ){
-                    val uri =data.data
-                    val schemeSpecificPart = data.data?.schemeSpecificPart
-                    Log.d("clockActivity onActivityResult", "schemeSpecificPart=$schemeSpecificPart")
-                    // check if the schemeSpecificPart matches the URI scheme we expect (lat,lon(label))
-                    if((schemeSpecificPart != null) && schemeSpecificPart.matches(Regex("^0,0\\?q=-?[0-9]+(\\.[0-9]*)?,-?[0-9]+(.[0-9]*)?\\(.*\\)$"))) {
-                        val (lat,lon,label) = schemeSpecificPart.substring("0,0?q=".length).split(Regex("[,\\(\\)]"))
-                        updateLocation(lat.toFloat(), lon.toFloat(), label)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun updateLocation(lat: Float, lon: Float, locationLabel: String) {
-        latitude = lat
-        longitude = lon
-        locationName = locationLabel
+    private fun updateLocation(location : Location) {
+        latitude = location.latitude
+        longitude = location.longitude
+        locationName = location.name
         // save in preferences:
         with(preferences.edit()) {
             putString(getString(R.string.clock_location_name), locationName)
@@ -207,7 +185,6 @@ class ClockActivity : AppCompatActivity() {
         private const val OCTAL_SECONDS_PER_OCTAL_MINUTE = 8*8
         private const val OCTAL_SECONDS_PER_SOLAR_DAY = OCTAL_SECONDS_PER_OCTAL_MINUTE * OCTAL_MINUTES_PER_SOLAR_DAY
         private const val MILLISECONDS_PER_OCTAL_SECOND = 24*60*60*1000.0 / OCTAL_SECONDS_PER_SOLAR_DAY
-        private const val LOCATION_REQUEST_CODE = 1
     }
 
     /**

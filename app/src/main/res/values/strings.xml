@@ -13,4 +13,5 @@
     <string name="description_icon_info">information sign</string>
     <string name="description_icon_source">source icon</string>
     <string name="sparqlQuery">SELECT ?stmt ?lat ?lon ?propRefLabel ?propObjectLabel\nWHERE\n{\n  wd:Q%d p:P625 ?stmt .\n  ?stmt psv:P625 ?coord.\n  ?coord wikibase:geoLatitude ?lat;\n         wikibase:geoLongitude ?lon.\n  OPTIONAL\n  {\n    ?stmt prov:wasDerivedFrom ?refnode .\n    ?refnode ?refnodeProp ?propRef .\n  }\n  OPTIONAL\n  {\n    ?stmt ?prop2 ?propObject .\n    ?prop2 rdf:type owl:ObjectProperty .\n    FILTER(?prop2 != psv:P625)\n  }\n  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\". }\n}\nORDER BY ?stmt</string>
+    <string name="search_timeout_notification">Search connection timed out</string>
 </resources>

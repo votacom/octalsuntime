@@ -20,6 +20,8 @@ import com.github.kittinunf.result.Result
 import org.json.JSONObject
 import java.net.SocketTimeoutException
 import java.util.*
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 
 /**
@@ -27,7 +29,6 @@ import java.util.*
  * At all times, it keeps the current search string, and the current search results (dataset).
  */
 class WikidataGeoListAdapter(val context: Context) : BaseAdapter(), Filterable, AddLocationAutoCompletionDialogFragment.ClickRegistrant<Location> {
-    private var searchString : String = ""
     private val dataset = Collections.synchronizedList(emptyList<LocatedItem>().toMutableList())
     /**
      * the lookup backlog is a list of items for which we haven't yet obtained a location.
@@ -92,7 +93,7 @@ class WikidataGeoListAdapter(val context: Context) : BaseAdapter(), Filterable, 
         synchronized(lookupBacklog) {
             for(item in lookupBacklog) {
                 val query = context.getString(R.string.sparqlQuery).format(item.id)
-                Log.i("wikidata", "sparkling following query:\n$query")
+                Log.d("wikidata", "sparkling following query:\n$query")
                 val cancellableSparqlRequest = "https://query.wikidata.org/sparql"
                     .httpPost(listOf("format" to "json", "query" to query))
                     .responseString { _, _, result ->
@@ -110,7 +111,7 @@ class WikidataGeoListAdapter(val context: Context) : BaseAdapter(), Filterable, 
                                 if(locations.isNotEmpty()) {
                                     synchronized(dataset) {
                                         for (l in locations) {
-                                            Log.i("wikidata", "adding to dataset: $item $l")
+                                            Log.d("wikidata", "adding to dataset: $item $l")
                                             dataset.add(LocatedItem(item, l))
                                         }
                                     }
@@ -124,36 +125,98 @@ class WikidataGeoListAdapter(val context: Context) : BaseAdapter(), Filterable, 
         }
     }
 
+    private var currentRequest : CancellableRequest? = null // current search request. May be cancelled if a new filtering task arrives.
+    private var mayRequestsBePublished = false // set to "true" when publishResults is invoked, telling us that it's okay to publish the results of the currentRequest now or once the request is finished.
+    private var itemResultList : List<Item>? = null
+    private val requestLock = ReentrantLock() // lock for cancelling or modifying currentRequest
+
     override fun getFilter(): Filter {
         return object : Filter() {
-            // FilterResults.values object must be of type List<Item>
+            // FilterResults.values object must be of type CancellableRequest?
             override fun performFiltering(p0: CharSequence?): FilterResults {
-                Log.i("wikidata", "requestd to perform filtering for search: $p0")
-                val query = p0?.toString() ?: ""
-                searchString = query
-                if(query.isEmpty()) {
-                    return FilterResults().apply { values = emptyList<Item>(); count = 0 }
+                requestLock.withLock {
+                    if(currentRequest != null ) Log.i("wikidata", "cancelling current request")
+                    currentRequest?.cancel() // first, cancel old search request
+                    mayRequestsBePublished = false
+                    itemResultList = null
+                    val emptyResults = FilterResults()
+                    Log.i("wikidata", "requested to perform filtering for search: $p0")
+                    val query = p0?.toString() ?: ""
+                    if (query.isEmpty()) {
+                        return emptyResults
+                    }
+                    // create new search request:
+                    currentRequest = "https://www.wikidata.org/w/api.php"
+                        .httpGet(
+                            listOf(
+                                "action" to "wbsearchentities",
+                                "language" to "en",
+                                "format" to "json",
+                                "search" to query
+                            )
+                        )
+                        .responseString { request, response, result ->
+                            when (result) {
+                                is Result.Failure -> {
+                                    val exception = result.getException()
+                                    if (exception.exception is SocketTimeoutException) {
+                                        // inform about the timeout in a Toast:
+                                        Toast.makeText(
+                                            context,
+                                            R.string.search_timeout_notification,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        Log.w("wikidata", "showed Toast. Also:%s".format(exception))
+                                    } else {
+                                        Log.w("wikidata", exception)
+                                    }
+                                }
+                                is Result.Success -> {
+                                    Log.d("wikidata", "success in result. JSONing for:%s".format(result.get()))
+                                    val json = JSONObject(result.get())
+                                    val jsonResults = json.getJSONArray("search")
+                                    val items = emptyList<Item>().toMutableList()
+                                    for (i in 0 until jsonResults.length()) {
+                                        val jsonResult = jsonResults.getJSONObject(i)
+                                        val idOk =
+                                            jsonResult.getString("id").matches(Regex("Q[0-9]+"))
+                                        if (!idOk) throw Exception()
+                                        val id = jsonResult.getString("id").substring(1).toInt()
+                                        val label = jsonResult.getString("label")
+                                        val description = jsonResult.optString("description", null)
+                                        items.add(Item(id, label, description))
+                                    }
+                                    requestLock.withLock {
+                                        Log.d("wikidata", "results received. Current url request? %s=?%s".format(request.url, currentRequest?.url))
+                                        // check if this request is still the current one. attn: request is Request, currentRequest is CancellableRequest. => Compare URLs:
+                                        if(request.url==currentRequest?.url) {
+                                            // we're not outdated. publish if already allowed to do so, otherwise park the results in "itemResultList".
+                                            if (mayRequestsBePublished) {
+                                                Log.d("wikidata", "publishing %d items".format(items.size))
+                                                update(items)
+                                            } else {
+                                                Log.d("wikidata", "parking %d items for future publishing".format(items.size))
+                                                itemResultList = items
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        return FilterResults().apply {
+                            values = currentRequest
+                        }
+                    }
                 }
-                val json = JSONObject("https://www.wikidata.org/w/api.php".httpGet(listOf("action" to "wbsearchentities", "language" to "en", "format" to "json", "search" to query)).responseString().third.component1())
-                val jsonResults = json.getJSONArray("search")
-                val items = emptyList<Item>().toMutableList()
-                for(i in 0 until jsonResults.length()) {
-                    val jsonResult = jsonResults.getJSONObject(i)
-                    val idOk = jsonResult.getString("id").matches(Regex("Q[0-9]+"))
-                    if(!idOk) throw Exception()
-                    val id = jsonResult.getString("id").substring(1).toInt()
-                    val label = jsonResult.getString("label")
-                    val description = jsonResult.optString("description", null)
-                    items.add(Item(id, label, description))
-                }
-                return FilterResults().apply { values = items; count = items.size }
-            }
 
             override fun publishResults(p0: CharSequence?, p1: FilterResults?) {
-                // if the search string is outdated, ignore the result:
-                if((p0?.toString() ?: "") == searchString && p1 != null && p1.values != null) {
-                    Log.i("wikidata", "publishing results for search: $p0")
-                    update(p1?.values as Collection<Item>)
+                requestLock.withLock {
+                    // if the search string is outdated, ignore the result:
+                    if (p1?.values == currentRequest) {
+                        Log.d("wikidata", "[allowing] publishing for %s".format(p0))
+                        // maybe the item results are already in. if so, publish them now. If not,
+                        itemResultList?.let{ update(it) } ?:let { mayRequestsBePublished = true }
+                    }
                 }
             }
         }

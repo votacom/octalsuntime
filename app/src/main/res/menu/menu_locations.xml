@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/add_location"
+        android:icon="@drawable/ic_baseline_add_location_alt_48"
+        android:title="@string/add_location"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/clear_locations"
+        android:icon="@drawable/ic_baseline_delete_48"
+        android:title="@string/clear_locations" />
+</menu>

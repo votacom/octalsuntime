@@ -4,26 +4,35 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".ClockActivity">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/location_view"
+        app:layout_constraintBottom_toTopOf="@+id/clock_location_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
         <view
             android:id="@+id/clock_face"
-            class="at.manuelbichler.octalsuntime.MainActivity$ClockFaceView"
+            class="at.manuelbichler.octalsuntime.ClockActivity$ClockFaceView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:elevation="1pt" />
 
         <view
             android:id="@+id/clock_fingers"
-            class="at.manuelbichler.octalsuntime.MainActivity$ClockFingersView"
+            class="at.manuelbichler.octalsuntime.ClockActivity$ClockFingersView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:elevation="2pt" />
@@ -41,18 +50,11 @@
     </FrameLayout>
 
     <TextView
-        android:id="@+id/location_view"
+        android:id="@+id/clock_location_name"
+        style="@style/TextAppearance.Material3.LabelLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/location_button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/location_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/update_location"
+        android:padding="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

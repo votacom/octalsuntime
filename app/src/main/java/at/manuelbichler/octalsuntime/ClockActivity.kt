@@ -1,38 +1,37 @@
 package at.manuelbichler.octalsuntime
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
+import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.location.Criteria
-import android.location.Location
-import android.location.LocationManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
-import android.widget.Button
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import androidx.appcompat.widget.Toolbar
 import ca.rmen.sunrisesunset.SunriseSunset
-import java.lang.Exception
 import java.time.Duration
 import java.util.*
 import kotlin.collections.HashSet
 import kotlin.math.*
 
-class MainActivity : AppCompatActivity() {
+class ClockActivity : AppCompatActivity() {
 
     var currentTime : Double = 0.0 // between 0 and 1
     var sunriseTime : Double = 0.0 // between 0 and 1
     var sunsetTime : Double = 1.0 // between 0 and 1
-    var latitude : Double = 0.0 // in degrees
-    var longitude : Double = 0.0 // in degrees
+    var latitude : Float = 0.0f // in degrees
+    var longitude : Float = 0.0f // in degrees
+    var locationName : String = ""
+
+    lateinit var preferences : SharedPreferences
 
     val updateHandler = Handler(Looper.getMainLooper())
 
@@ -41,99 +40,34 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_main)
-        val updateLocationButton = findViewById<Button>(R.id.location_button)
-        val locationPermissionRequest = registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { //all good. maybe granted, maybe not. todo maybe show an alert to the user if permission was denied.
-        }
-        val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+        setContentView(R.layout.activity_clock)
+        setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
 
-        updateLocationButton.setOnClickListener{
-            Log.i("location", "location update button pressed.")
-            // do we have location permission already?
-            if( ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED )
-            {
-                Log.i("location", "location access not yet granted.")
-                if( shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) )
-                {
-                    // show an educational UI to the user TODO https://developer.android.com/training/permissions/requesting#explain
-                }
-                locationPermissionRequest.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
-            }
-            // now, update location:
-            val criteria = Criteria().apply { this.accuracy = Criteria.ACCURACY_COARSE; this.isAltitudeRequired = false }
-            val providers = locationManager.getProviders(criteria, true)
-            var remainingProviders = providers.minus(locationProviderBlocklist).toHashSet()
-            if(remainingProviders.isEmpty()) {
-                // no remaining providers? Let's reset the blocklist to be able to start anew:
-                locationProviderBlocklist.clear()
-                remainingProviders = providers.toHashSet()
-            }
-            val bestProvider = locationManager.getBestProvider(criteria, true )
-            var locationUpdatePosted = false
-            while (remainingProviders.isNotEmpty() && !locationUpdatePosted) {
-                val tryProvider : String
-                if(remainingProviders.size > 1 && bestProvider != null && remainingProviders.contains(bestProvider)) {
-                    tryProvider = bestProvider
-                }
-                else {
-                    tryProvider = remainingProviders.first()
-                }
-                remainingProviders.remove(tryProvider)
-                try {
-                    locationManager.getCurrentLocation(
-                        tryProvider,
-                        null,
-                        { run -> run.run() }) { loc: Location? ->
-                        if( loc == null ) { // block this location provider for the future:
-                            Log.i("location", "location provider %s was unable to return a location. Blocking this provider.".format(tryProvider))
-                            locationProviderBlocklist.add(tryProvider)
-                            // and retry the location getting if it was not the last option:
-                            if(remainingProviders.isNotEmpty()) {
-                                updateLocationButton.callOnClick()
-                            }
-                        } else {
-                            updateLocation(loc.latitude, loc.longitude)
-                        }
-                    }
-                    locationUpdatePosted = true
-                    Log.i("location", "location request successfully posted to provider %s".format(tryProvider))
-                } catch (e:Exception) {
-                    Log.w("location", "location provider %s threw exception:\n%s".format(tryProvider, e))
-                }
-                if(remainingProviders.isEmpty()) {
-                    Log.w("location", "location providers exhausted. No location provider could provide a location. Not updating the app's location.")
-                }
-            }
-        }
+        preferences = this.getPreferences(Context.MODE_PRIVATE)
 
-        // start with last known location:
-        val criteria = Criteria().apply { this.accuracy = Criteria.ACCURACY_COARSE; this.isAltitudeRequired = false }
-        val providers = locationManager.getProviders(criteria, true)
-        val bestProvider = locationManager.getBestProvider(criteria, true )
-        var locationFound = false
-        while (providers.isNotEmpty()) {
-            val tryProvider : String
-            if( bestProvider != null && providers.contains(bestProvider) ) {
-                tryProvider = bestProvider
-            }
-            else {
-                tryProvider = providers.first()
-            }
-            providers.remove(tryProvider)
-            val location = locationManager.getLastKnownLocation(tryProvider)
-            if( location != null ) {
-                locationFound = true
-                updateLocation(location.latitude, location.longitude)
-                break
-            }
-        }
+        // start with location set in preferences:
+        val defaultLocationName = getString(R.string.default_clock_location_name)
+        val defaultLocationLat = getString(R.string.default_clock_location_latitude).toFloat()
+        val defaultLocationLon = getString(R.string.default_clock_location_longitude).toFloat()
 
-        if(!locationFound) {
-            // start with 0/0 location, until updated (todo use last known location instead):
-            updateLocation(0.0, 0.0)
+        if( preferences.contains( getString(R.string.clock_location_name))
+            && preferences.contains( getString(R.string.clock_location_latitude))
+            && preferences.contains( getString(R.string.clock_location_longitude)) ) {
+            locationName = preferences.getString(getString(R.string.clock_location_name), defaultLocationName)!!
+            latitude = preferences.getString(getString(R.string.clock_location_latitude), null)?.toFloat()?:defaultLocationLat
+            longitude = preferences.getString(getString(R.string.clock_location_longitude), null)?.toFloat()?:defaultLocationLat
+        } else {
+            locationName = defaultLocationName
+            latitude = defaultLocationLat
+            longitude = defaultLocationLon
+            with(preferences.edit()) {
+                putString(getString(R.string.clock_location_name), locationName)
+                putString(getString(R.string.clock_location_latitude), latitude.toString())
+                putString(getString(R.string.clock_location_longitude), longitude.toString())
+                apply() // save
+            }
         }
+        updateUiLocation()
     }
 
     /**
@@ -160,36 +94,43 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * given the location, updates the location info in the app and updates the clock.
+     * updates the clock according to lat and lon members and the location label.
      */
-    fun updateLocation(latitude : Double, longitude : Double ) {
-        this.latitude = latitude
-        this.longitude = longitude
-        val locationTextview = findViewById<TextView>(R.id.location_view)
+    fun updateUiLocation() {
+        val locationNameTextview = findViewById<TextView>(R.id.clock_location_name)
         runOnUiThread{
-            locationTextview.text = "Latitude: %f\nLongitude: %f".format(latitude, longitude)
+            locationNameTextview.text = locationName
         }
         updateClock()
     }
 
     /**
-     * uses the stored latitude and longitude to update the clock. Also updates the UI.
+     * uses the stored latitude and longitude to update the clock to "now". Also updates the UI.
      */
     private fun updateClock() {
         val digitalClock = findViewById<TextView>(R.id.digital_clock)
         val clockFingers = findViewById<ClockFingersView>(R.id.clock_fingers)
         // get sun location
-        val now = Calendar.getInstance()
-        val sunriseSunset: Array<Calendar> = SunriseSunset.getSunriseSunset(
-            now,
-            latitude,
-            longitude
-        )
-        val sunrise = sunriseSunset[0].time
-        val sunset = sunriseSunset[1].time
-        val solarnoon = SunriseSunset.getSolarNoon(now, latitude, longitude).time
-
-        updateTimes(now.time, sunrise, sunset, solarnoon)
+        with(this) {
+            val now = Calendar.getInstance()
+            val sunriseSunset: Array<Calendar>? = SunriseSunset.getSunriseSunset(
+                now,
+                latitude.toDouble(),
+                longitude.toDouble()
+            )
+            // if null was returned, it means it's all day sun/night. Pretend sunrise=sunset=now for now and deal with this case later.
+            val sunrise = sunriseSunset?.get(0)?.time ?: now.time
+            val sunset = sunriseSunset?.get(1)?.time ?: now.time
+            val solarNoon =
+                SunriseSunset.getSolarNoon(now, latitude.toDouble(), longitude.toDouble()).time
+            updateTimes(now.time, sunrise, sunset, solarNoon)
+            if (sunriseSunset == null) {
+                // is it all day or all night?
+                val isDay = SunriseSunset.isDay(now, latitude.toDouble(), longitude.toDouble())
+                sunriseTime = 0.0
+                sunsetTime = if (isDay) 1.0 else 0.0
+            }
+        }
 
         val ocataltimeMinutes = currentTime*OCTAL_MINUTES_PER_SOLAR_DAY
 
@@ -205,12 +146,68 @@ class MainActivity : AppCompatActivity() {
         updateHandler.postDelayed({this.updateClock()}, millisecondsUntilNextOctalSecond.roundToLong() + 1)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.manage_locations -> {
+                startActivityForResult(Intent(this, LocationsActivity::class.java),
+                    Companion.LOCATION_REQUEST_CODE
+                )
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Log.d("clockActivity onActivityResult", "requestCode=$requestCode, resultCode=$resultCode, data=$data")
+        when(requestCode) {
+            LOCATION_REQUEST_CODE -> {
+                if(resultCode==RESULT_OK && data?.data?.scheme == "geo" ){
+                    val uri =data.data
+                    val schemeSpecificPart = data.data?.schemeSpecificPart
+                    Log.d("clockActivity onActivityResult", "schemeSpecificPart=$schemeSpecificPart")
+                    // check if the schemeSpecificPart matches the URI scheme we expect (lat,lon(label))
+                    if((schemeSpecificPart != null) && schemeSpecificPart.matches(Regex("^0,0\\?q=-?[0-9]+(\\.[0-9]*)?,-?[0-9]+(.[0-9]*)?\\(.*\\)$"))) {
+                        val (lat,lon,label) = schemeSpecificPart.substring("0,0?q=".length).split(Regex("[,\\(\\)]"))
+                        updateLocation(lat.toFloat(), lon.toFloat(), label)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateLocation(lat: Float, lon: Float, locationLabel: String) {
+        latitude = lat
+        longitude = lon
+        locationName = locationLabel
+        // save in preferences:
+        with(preferences.edit()) {
+            putString(getString(R.string.clock_location_name), locationName)
+            putString(getString(R.string.clock_location_latitude), latitude.toString())
+            putString(getString(R.string.clock_location_longitude), longitude.toString())
+            apply() // save
+        }
+        updateUiLocation()
+    }
+
+
     companion object {
         private const val OCTAL_HOURS_PER_SOLAR_DAY = 8
         private const val OCTAL_MINUTES_PER_SOLAR_DAY = 8*8* OCTAL_HOURS_PER_SOLAR_DAY
         private const val OCTAL_SECONDS_PER_OCTAL_MINUTE = 8*8
         private const val OCTAL_SECONDS_PER_SOLAR_DAY = OCTAL_SECONDS_PER_OCTAL_MINUTE * OCTAL_MINUTES_PER_SOLAR_DAY
         private const val MILLISECONDS_PER_OCTAL_SECOND = 24*60*60*1000.0 / OCTAL_SECONDS_PER_SOLAR_DAY
+        private const val LOCATION_REQUEST_CODE = 1
     }
 
     /**

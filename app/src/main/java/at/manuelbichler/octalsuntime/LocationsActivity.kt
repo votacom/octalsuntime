@@ -1,16 +1,19 @@
 package at.manuelbichler.octalsuntime
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
 import at.manuelbichler.octalsuntime.adapter.LocationAdapter
+import at.manuelbichler.octalsuntime.model.Location
+import at.manuelbichler.octalsuntime.wikidata.Item
+import at.manuelbichler.octalsuntime.wikidata.WikidataGeoListAdapter
 
-class LocationsActivity : AppCompatActivity() {
+class LocationsActivity : AppCompatActivity(), AddLocationAutoCompletionDialogFragment.LocationDialogListener {
 
     private val viewModel : LocationViewModel by viewModels<LocationViewModel> {
         LocationsViewModelFactory( (application as OctalSuntimeApplication).database.locationDao() )
@@ -48,16 +51,23 @@ class LocationsActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-/*            R.id.add_location -> {
-                startActivity(Intent(this, AddLocationActivity::class.java))
+            R.id.add_location -> {
+                // show the search location dialog:
+                val adapter = WikidataGeoListAdapter(this)
+                val newFragment = AddLocationAutoCompletionDialogFragment(adapter)
+                newFragment.show(supportFragmentManager, "location finder")
                 true
-            }*/
+            }
             R.id.clear_locations -> {
-                viewModel.clear() // TODO errors: java.lang.IllegalStateException: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
+                viewModel.clear()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onLocationChosen(dialog: DialogFragment, chosenObject: Location) {
+        viewModel.addNewLocation(chosenObject)
     }
 
 }

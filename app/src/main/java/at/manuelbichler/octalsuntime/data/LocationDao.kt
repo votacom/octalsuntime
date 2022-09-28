@@ -13,20 +13,20 @@ interface LocationDao {
     fun getAll(): Flow<List<Location>>
 
     @Query("SELECT * FROM location WHERE name LIKE :name LIMIT 1")
-    fun findByName(name: String): Location
+    suspend fun findByName(name: String): Location
 
     @Query("SELECT * FROM location WHERE name LIKE :name")
     fun searchByName(name: String): Flow<List<Location>>
 
     @Insert
-    fun insertAll(vararg locations: Location)
+    suspend fun insertAll(vararg locations: Location)
 
     @Insert
-    fun insert(location: Location)
+    suspend fun insert(location: Location)
 
     @Delete
-    fun delete(location: Location)
+    suspend fun delete(location: Location)
 
     @Query("DELETE FROM location")
-    fun deleteAll()
+    suspend fun deleteAll()
 }

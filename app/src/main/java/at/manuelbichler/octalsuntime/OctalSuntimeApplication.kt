@@ -6,6 +6,5 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 
 class OctalSuntimeApplication : Application() {
-    private val appScope = CoroutineScope(SupervisorJob())
-    val database: AppDatabase by lazy { AppDatabase.getDatabase(this, appScope) }
+    val database: AppDatabase by lazy { AppDatabase.getDatabase(this) }
 }

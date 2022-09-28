@@ -1,6 +1,5 @@
 package at.manuelbichler.octalsuntime.adapter
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,13 +14,11 @@ class LocationAdapter() : ListAdapter<Location, LocationAdapter.LocationViewHold
 
     class LocationViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         val nameView: TextView = view.findViewById(R.id.location_name)
-        val latView: TextView = view.findViewById(R.id.location_lat)
-        val lonView: TextView = view.findViewById(R.id.location_lon)
+        val geoView: TextView = view.findViewById(R.id.location_geo)
 
         fun bind(location: Location) {
             nameView.text = location.name
-            latView.text = "%.2f".format(location.latitude)
-            lonView.text = "%.2f".format(location.longitude)
+            geoView.text = "%.2f, %.2f".format(location.latitude, location.longitude)
         }
         companion object {
             fun create(parent: ViewGroup) : LocationViewHolder {

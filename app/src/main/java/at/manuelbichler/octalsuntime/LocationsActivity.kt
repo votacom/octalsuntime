@@ -1,17 +1,20 @@
 package at.manuelbichler.octalsuntime
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
 import at.manuelbichler.octalsuntime.adapter.LocationAdapter
 import at.manuelbichler.octalsuntime.model.Location
-import at.manuelbichler.octalsuntime.wikidata.Item
 import at.manuelbichler.octalsuntime.wikidata.WikidataGeoListAdapter
+
 
 class LocationsActivity : AppCompatActivity(), AddLocationAutoCompletionDialogFragment.LocationDialogListener {
 
@@ -27,6 +30,15 @@ class LocationsActivity : AppCompatActivity(), AddLocationAutoCompletionDialogFr
 
         val recyclerView = findViewById<RecyclerView>(R.id.locations_recycler_view)
         val adapter = LocationAdapter()
+        adapter.onClickListener = View.OnClickListener { view ->
+            // select this location. Return it to the callign activity.
+            val holder = recyclerView.findContainingViewHolder(view) as LocationAdapter.LocationViewHolder
+            val location = holder.location
+            val returnIntent = Intent()
+            returnIntent.data = Uri.Builder().scheme("geo").opaquePart("0,0?q=%f,%f(%s)".format(location.latitude, location.longitude, location.name)).build()
+            setResult(RESULT_OK, returnIntent)
+            finish()
+        }
         recyclerView.adapter = adapter
         recyclerView.setHasFixedSize(true)
 
@@ -37,7 +49,6 @@ class LocationsActivity : AppCompatActivity(), AddLocationAutoCompletionDialogFr
             // Update the cached copy of the locations in the adapter.
             locations.let { adapter.submitList(it) }
         }
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

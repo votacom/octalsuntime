@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -17,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import ca.rmen.sunrisesunset.SunriseSunset
 import java.time.Duration
-import java.time.Instant
 import java.util.*
 import kotlin.collections.HashSet
 import kotlin.math.*
@@ -158,11 +158,46 @@ class ClockActivity : AppCompatActivity() {
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.manage_locations -> {
-                startActivity(Intent(this, LocationsActivity::class.java))
+                startActivityForResult(Intent(this, LocationsActivity::class.java),
+                    Companion.LOCATION_REQUEST_CODE
+                )
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Log.d("clockActivity onActivityResult", "requestCode=$requestCode, resultCode=$resultCode, data=$data")
+        when(requestCode) {
+            LOCATION_REQUEST_CODE -> {
+                if(resultCode==RESULT_OK && data?.data?.scheme == "geo" ){
+                    val uri =data.data
+                    val schemeSpecificPart = data.data?.schemeSpecificPart
+                    Log.d("clockActivity onActivityResult", "schemeSpecificPart=$schemeSpecificPart")
+                    // check if the schemeSpecificPart matches the URI scheme we expect (lat,lon(label))
+                    if((schemeSpecificPart != null) && schemeSpecificPart.matches(Regex("^0,0\\?q=-?[0-9]+(\\.[0-9]*)?,-?[0-9]+(.[0-9]*)?\\(.*\\)$"))) {
+                        val (lat,lon,label) = schemeSpecificPart.substring("0,0?q=".length).split(Regex("[,\\(\\)]"))
+                        updateLocation(lat.toFloat(), lon.toFloat(), label)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateLocation(lat: Float, lon: Float, locationLabel: String) {
+        latitude = lat
+        longitude = lon
+        locationName = locationLabel
+        // save in preferences:
+        with(preferences.edit()) {
+            putString(getString(R.string.clock_location_name), locationName)
+            putString(getString(R.string.clock_location_latitude), latitude.toString())
+            putString(getString(R.string.clock_location_longitude), longitude.toString())
+            apply() // save
+        }
+        updateUiLocation()
     }
 
 
@@ -172,6 +207,7 @@ class ClockActivity : AppCompatActivity() {
         private const val OCTAL_SECONDS_PER_OCTAL_MINUTE = 8*8
         private const val OCTAL_SECONDS_PER_SOLAR_DAY = OCTAL_SECONDS_PER_OCTAL_MINUTE * OCTAL_MINUTES_PER_SOLAR_DAY
         private const val MILLISECONDS_PER_OCTAL_SECOND = 24*60*60*1000.0 / OCTAL_SECONDS_PER_SOLAR_DAY
+        private const val LOCATION_REQUEST_CODE = 1
     }
 
     /**

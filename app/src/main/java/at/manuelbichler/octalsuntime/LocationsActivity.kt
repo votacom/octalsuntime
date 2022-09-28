@@ -1,11 +1,13 @@
 package at.manuelbichler.octalsuntime
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -79,6 +81,34 @@ class LocationsActivity : AppCompatActivity(), AddLocationAutoCompletionDialogFr
 
     override fun onLocationChosen(dialog: DialogFragment, chosenObject: Location) {
         viewModel.addNewLocation(chosenObject)
+    }
+
+    /**
+     * ActivityResultContract that delivers back to the caller a user-selected Location
+     */
+    class SelectLocationContract : ActivityResultContract<Nothing?, Location?>() {
+        override fun createIntent(context: Context, input: Nothing?): Intent {
+            return Intent(context, LocationsActivity::class.java)
+        }
+
+        override fun parseResult(resultCode: Int, intent: Intent?): Location? {
+            when(resultCode) {
+                RESULT_OK -> {
+                    if (intent?.data?.scheme == "geo") {
+                        val schemeSpecificPart = intent.data?.schemeSpecificPart
+                        // check if the schemeSpecificPart matches the URI scheme we expect (lat,lon(label))
+                        if ((schemeSpecificPart != null) && schemeSpecificPart.matches(Regex("^0,0\\?q=-?[0-9]+(\\.[0-9]*)?,-?[0-9]+(.[0-9]*)?\\(.*\\)$"))) {
+                            val (lat, lon, labelWithParens) = schemeSpecificPart.substring("0,0?q=".length)
+                                .split(',','(',')', limit=3)
+                            val label = labelWithParens.dropLast(1)
+                            return Location(label, lat.toFloat(), lon.toFloat())
+                        }
+                    }
+                }
+            }
+            return null
+        }
+
     }
 
 }

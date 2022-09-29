@@ -1,16 +1,17 @@
 package at.manuelbichler.octalsuntime
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import android.view.ContextMenu
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
 import at.manuelbichler.octalsuntime.adapter.LocationAdapter
@@ -20,7 +21,9 @@ import at.manuelbichler.octalsuntime.wikidata.WikidataGeoListAdapter
 
 class LocationsActivity : AppCompatActivity(), AddLocationAutoCompletionDialogFragment.LocationDialogListener {
 
-    private val viewModel : LocationViewModel by viewModels<LocationViewModel> {
+    private lateinit var recyclerView : RecyclerView
+
+    private val viewModel : LocationViewModel by viewModels {
         LocationsViewModelFactory( (application as OctalSuntimeApplication).database.locationDao() )
     }
 
@@ -28,16 +31,40 @@ class LocationsActivity : AppCompatActivity(), AddLocationAutoCompletionDialogFr
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_locations)
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // allow navigating back
-        setSupportActionBar(findViewById<Toolbar>(R.id.locations_toolbar))
+        setSupportActionBar(findViewById(R.id.locations_toolbar))
 
-        val recyclerView = findViewById<RecyclerView>(R.id.locations_recycler_view)
-        val adapter = LocationAdapter()
+        recyclerView = findViewById(R.id.locations_recycler_view)
+        val adapter = LocationAdapter( fun (v:View):Nothing? {
+            registerForContextMenu(v)
+            return null
+        }, fun(item: MenuItem, location: Location) : Boolean {
+            return when (item.itemId) {
+                R.id.share_location -> {
+                    Intent().apply {
+                        data = location.toUri()
+                        action = Intent.ACTION_VIEW
+                    }.also {
+                        try{
+                            startActivity(it)
+                        } catch(e : ActivityNotFoundException) {
+                            Toast.makeText(this, getString(R.string.message_no_location_app), Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    true
+                }
+                R.id.delete_location -> {
+                    viewModel.delete(location)
+                    true
+                }
+                else -> false
+            }
+
+        })
         adapter.onClickListener = View.OnClickListener { view ->
-            // select this location. Return it to the callign activity.
+            // select this location. Return it to the calling activity (the clock).
             val holder = recyclerView.findContainingViewHolder(view) as LocationAdapter.LocationViewHolder
-            val location = holder.location
             val returnIntent = Intent()
-            returnIntent.data = Uri.Builder().scheme("geo").opaquePart("0,0?q=%f,%f(%s)".format(location.latitude, location.longitude, location.name)).build()
+            returnIntent.data = holder.location.toUri()
             setResult(RESULT_OK, returnIntent)
             finish()
         }
@@ -53,10 +80,26 @@ class LocationsActivity : AppCompatActivity(), AddLocationAutoCompletionDialogFr
         }
     }
 
+    override fun onCreateContextMenu(
+        menu: ContextMenu?,
+        v: View?,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        menuInflater.inflate(R.menu.contextmenu_location, menu)
+        if(v != null && menu != null)
+            ( recyclerView.findContainingViewHolder(v) as LocationAdapter.LocationViewHolder )
+                .registerAsContextMenuClickListener(menu)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_locations, menu)
         return true
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        return false
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -94,21 +137,11 @@ class LocationsActivity : AppCompatActivity(), AddLocationAutoCompletionDialogFr
         override fun parseResult(resultCode: Int, intent: Intent?): Location? {
             when(resultCode) {
                 RESULT_OK -> {
-                    if (intent?.data?.scheme == "geo") {
-                        val schemeSpecificPart = intent.data?.schemeSpecificPart
-                        // check if the schemeSpecificPart matches the URI scheme we expect (lat,lon(label))
-                        if ((schemeSpecificPart != null) && schemeSpecificPart.matches(Regex("^0,0\\?q=-?[0-9]+(\\.[0-9]*)?,-?[0-9]+(.[0-9]*)?\\(.*\\)$"))) {
-                            val (lat, lon, labelWithParens) = schemeSpecificPart.substring("0,0?q=".length)
-                                .split(',','(',')', limit=3)
-                            val label = labelWithParens.dropLast(1)
-                            return Location(label, lat.toFloat(), lon.toFloat())
-                        }
-                    }
+                    return intent?.data?.let { Location.fromUri(it) }
                 }
             }
             return null
         }
 
     }
-
 }

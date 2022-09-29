@@ -6,6 +6,8 @@
     <string name="add_location">Add location</string>
     <string name="search_locations">Search locations</string>
     <string name="clear_locations">Clear locations</string>
+    <string name="share_location">Share location</string>
+    <string name="delete_location">Delete location</string>
     <string name="dialog_search_location">Search location</string>
     <string name="cancel">cancel</string>
     <string name="location_name_query">Name of place</string>
@@ -20,4 +22,5 @@
     <string name="default_clock_location_latitude">51.48</string>
     <string name="default_clock_location_longitude">0.0</string>
     <string name="default_clock_location_name">Greenwich</string>
+    <string name="message_no_location_app">No app can take a location.</string>
 </resources>

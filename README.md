@@ -1,7 +1,7 @@
 # octalsuntime
 A solar clock in the octal number system
 
-![Screenshot](https://user-images.githubusercontent.com/5845239/190221775-4f55d8a8-b760-4ba6-897b-f798fadcb627.png)
+![image](https://user-images.githubusercontent.com/5845239/193315581-779af7ce-4df9-4edc-9fc7-c86709c88c45.png)
 
 This is an Android application that implements the octal solar time.
 
@@ -11,3 +11,5 @@ Each octal hour is divided into 64 equally long octal minutes.
 Each octal minute is divided into 64 equally long octal seconds.
 
 The clock is visualized by an hour finger that runs one cycle per day, with 0 (solar midnight) at the bottom and 4 (solar noon) at the top.
+
+Locations can be managed and chosen. Locations can be added by a search function backed by [wikidata](https://www.wikidata.org/).

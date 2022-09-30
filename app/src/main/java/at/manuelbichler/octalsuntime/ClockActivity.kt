@@ -119,8 +119,13 @@ class ClockActivity : AppCompatActivity() {
             // if null was returned, it means it's all day sun/night. Pretend sunrise=sunset=now for now and deal with this case later.
             val sunrise = sunriseSunset?.get(0)?.time ?: now.time
             val sunset = sunriseSunset?.get(1)?.time ?: now.time
+            /*
+            #SunriseSunset.getSolarNoon retunrs null for locations that don't have a sunrise/sunset.
+            But we still want to show the "solar noon" on top at the clock, where we define "solar noon" as the day's point in time when the sun is highest, even if it is below the horizon. This also applies if the sun never rises; it it then the time of day when the sun is the least amount under the horizon.
+            => same point in time on the whole latitude, so we can set longitude to 0 (equator), there's always a sunrise and a sunset each day.
+             */
             val solarNoon =
-                SunriseSunset.getSolarNoon(now, latitude.toDouble(), longitude.toDouble()).time
+                SunriseSunset.getSolarNoon(now, 0.0, longitude.toDouble()).time
             updateTimes(now.time, sunrise, sunset, solarNoon)
             if (sunriseSunset == null) {
                 // is it all day or all night?

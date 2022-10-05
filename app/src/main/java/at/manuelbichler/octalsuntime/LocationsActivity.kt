@@ -13,8 +13,6 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.map
 import androidx.recyclerview.widget.RecyclerView
 import at.manuelbichler.octalsuntime.adapter.LocationAdapter
 import at.manuelbichler.octalsuntime.model.Location

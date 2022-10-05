@@ -1,9 +1,6 @@
 package at.manuelbichler.octalsuntime.data
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 import at.manuelbichler.octalsuntime.model.Location
 import kotlinx.coroutines.flow.Flow
 
@@ -12,8 +9,8 @@ interface LocationDao {
     @Query("SELECT * FROM location")
     fun getAll(): Flow<List<Location>>
 
-    @Query("SELECT * FROM location WHERE name LIKE :name LIMIT 1")
-    suspend fun findByName(name: String): Location
+    @Query("SELECT * FROM location WHERE name = :name")
+    suspend fun getByName(name: String): Location?
 
     @Query("SELECT * FROM location WHERE name LIKE :name")
     fun searchByName(name: String): Flow<List<Location>>
@@ -21,7 +18,7 @@ interface LocationDao {
     @Insert
     suspend fun insertAll(vararg locations: Location)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(location: Location)
 
     @Delete
@@ -29,4 +26,5 @@ interface LocationDao {
 
     @Query("DELETE FROM location")
     suspend fun deleteAll()
+
 }

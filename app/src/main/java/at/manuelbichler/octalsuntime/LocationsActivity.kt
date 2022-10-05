@@ -13,6 +13,8 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.map
 import androidx.recyclerview.widget.RecyclerView
 import at.manuelbichler.octalsuntime.adapter.LocationAdapter
 import at.manuelbichler.octalsuntime.model.Location
@@ -123,7 +125,12 @@ class LocationsActivity : AppCompatActivity(), AddLocationAutoCompletionDialogFr
     }
 
     override fun onLocationChosen(dialog: DialogFragment, chosenObject: Location) {
-        viewModel.addNewLocation(chosenObject)
+        viewModel.getByName(chosenObject.name).observe(this ) {
+            if( it==null )
+                viewModel.addNewLocation(chosenObject)
+            else
+                Toast.makeText(this@LocationsActivity, getString(R.string.message_location_name_already_exists).format(chosenObject.name), Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**

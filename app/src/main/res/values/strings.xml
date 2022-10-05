@@ -23,4 +23,5 @@
     <string name="default_clock_location_longitude">0.0</string>
     <string name="default_clock_location_name">Greenwich</string>
     <string name="message_no_location_app">No app can take a location.</string>
+    <string name="message_location_name_already_exists">Location with name %s already exists.</string>
 </resources>

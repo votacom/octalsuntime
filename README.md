@@ -1,7 +1,11 @@
 # octalsuntime
 A solar clock in the octal number system
 
-![image](https://user-images.githubusercontent.com/5845239/193315581-779af7ce-4df9-4edc-9fc7-c86709c88c45.png)
+<a href="https://f-droid.org/en/packages/at.manuelbichler.octalsuntime/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="75" /></a>
+[![F-Droid](https://img.shields.io/f-droid/v/at.manuelbichler.octalsuntime.svg)](https://f-droid.org/en/packages/at.manuelbichler.octalsuntime/)
+[![GitHub release](https://img.shields.io/github/release/votacom/octalsuntime.svg)](https://github.com/votacom/octalsuntime/releases)
+
+![image](https://github.com/votacom/octalsuntime/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png)
 
 This is an Android application that implements the octal solar time.
 

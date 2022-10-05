@@ -13,6 +13,7 @@
         <entry key="app/src/main/res/drawable/ic_baseline_share_48.xml" value="0.1825" />
         <entry key="app/src/main/res/drawable/ic_baseline_source_48.xml" value="0.1875" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.22" />
+        <entry key="app/src/main/res/drawable/ic_launcher_test_manu_foreground.xml" value="0.1965" />
         <entry key="app/src/main/res/layout/activity_add_location.xml" value="0.17916666666666667" />
         <entry key="app/src/main/res/layout/activity_clock.xml" value="0.2" />
         <entry key="app/src/main/res/layout/activity_locations.xml" value="0.22" />
@@ -31,7 +32,7 @@
         <entry key="app/src/main/res/menu/menu_locations.xml" value="0.3111111111111111" />
         <entry key="app/src/main/res/menu/menu_main.xml" value="0.178125" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2" />
-        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1895" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.22" />
       </map>
     </option>
   </component>

@@ -1,7 +1,6 @@
 package at.manuelbichler.octalsuntime
 
 import androidx.lifecycle.*
-import androidx.room.RoomDatabase
 import at.manuelbichler.octalsuntime.model.Location
 import at.manuelbichler.octalsuntime.data.LocationDao
 import kotlinx.coroutines.launch
@@ -26,6 +25,10 @@ class LocationViewModel(private val dao : LocationDao) : ViewModel() {
         viewModelScope.launch {
             dao.delete(loc)
         }
+    }
+
+    fun getByName(name: String) : LiveData<Location?> = liveData {
+        emit(dao.getByName(name))
     }
 
     fun addNewLocation(name: String, latitude: Float, longitude: Float) {

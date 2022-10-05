@@ -1,0 +1,6 @@
+* No location permission anymore. Locations are added by searching for them with wikidata backend.
+* Multiple locations can be added, one location can be chosen for the clock screen
+* Locations can be deleted individually or in bulk, and shared with other apps
+* default clock location is Greenwich until another location is chosen
+* fixed a bug where the clock would crash on days without sunrise or sunset
+* the app's layout now also works well in horizontal use

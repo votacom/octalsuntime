@@ -1,5 +1,5 @@
 # octalsuntime
-A solar clock in the octal number system
+A clock for solar time in the octal number system
 
 <a href="https://f-droid.org/en/packages/at.manuelbichler.octalsuntime/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="75" /></a>
 [![F-Droid](https://img.shields.io/f-droid/v/at.manuelbichler.octalsuntime.svg)](https://f-droid.org/en/packages/at.manuelbichler.octalsuntime/)

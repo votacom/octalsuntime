@@ -1,1 +1,1 @@
-A solar clock in the octal number system
+A clock for solar time in the octal number system

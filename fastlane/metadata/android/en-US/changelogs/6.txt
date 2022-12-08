@@ -1,0 +1,1 @@
+* A bug is fixed where location selection would crash the app on systems with non-English locale.

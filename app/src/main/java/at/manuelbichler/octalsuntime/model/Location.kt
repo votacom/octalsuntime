@@ -12,7 +12,7 @@ data class Location(
     val longitude: Float
     // lat and lon: on Earth, in degrees.
 ) {
-    fun toUri() : Uri = Uri.Builder().scheme("geo").opaquePart("0,0?q=%f,%f(%s)".format(latitude, longitude, name)).build()
+    fun toUri() : Uri = Uri.Builder().scheme("geo").opaquePart("0,0?q=%f,%f(%s)".format(null, latitude, longitude, name)).build() // "null" locale to avoid localization. ('.' decimal dot)
     companion object {
         /**
          * creates and returns a location based on a geo: Uri.
